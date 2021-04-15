@@ -35,6 +35,9 @@ class GradientController(KettleController):
             cbpi.app.logger.info('currentTemp: {0}'.format(currentTemp))
             cbpi.app.logger.info('targetTemp: {0}'.format(targetTemp))
             cbpi.app.logger.info('lastTemp: {0}'.format(lastTemp))
+            print 'currentTemp: {0}'.format(currentTemp)
+            print 'targetTemp: {0}'.format(targetTemp)
+            print 'lastTemp: {0}'.format(lastTemp)
 
             # gradient can only be calculated, if temperatur of the last loop is known
             if (lastTemp > 0):
@@ -42,12 +45,14 @@ class GradientController(KettleController):
                 gradient = ((currentTemp - lastTemp) / sampleTime) * 60 # gradient in kelvin per minute
 
                 cbpi.app.logger.info('gradient: {0}'.format(gradient))
+                print 'gradient: {0}'.format(gradient)
                 
                 if (currentTemp >= targetTemp - (gradient * gradientFactor)):
-                    cbpi.app.logger.info('heater off')
+                    print 'heater off'
                     self.heater_off()
                 elif (currentTemp <= targetTemp - (gradient * gradientFactor) - hysteresis):
                     cbpi.app.logger.info('heater on')
+                    print 'heater on'
                     self.heater_on(100)
 
             lastTemp = currentTemp
