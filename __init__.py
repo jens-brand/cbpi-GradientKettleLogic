@@ -19,19 +19,19 @@ class GradientController(KettleController):
         :return: 
         '''
 
-        sampleTime = 10                         # in seconds
-        lastTemp = 0                            # kettle temperature of last loop
-        gradientFactor = self.gradientFactor    # gradient factor from settings
-        hysteresis = self.hyteresis             # hysteresis to prevent to many on/off switches
+        sampleTime = 10                                # in seconds
+        lastTemp = 0                                   # kettle temperature of last loop
+        gradientFactor = float(self.gradientFactor)    # gradient factor from settings
+        hysteresis = float(self.hyteresis)             # hysteresis to prevent to many on/off switches
         self._logger = logging.getLogger(type(self).__name__)
         
         while self.is_running():
             
             # get current kettle temperature
-            currentTemp = self.get_temp()
+            currentTemp = float(self.get_temp())
             
             # get current kettle target temperature 
-            targetTemp = self.get_target_temp()
+            targetTemp = float(self.get_target_temp())
             
             self._logger.debug('currentTemp: {0}'.format(currentTemp))
             self._logger.debug('targetTemp: {0}'.format(targetTemp))
