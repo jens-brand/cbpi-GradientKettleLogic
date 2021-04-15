@@ -23,7 +23,7 @@ class GradientController(KettleController):
         lastTemp = 0                            # kettle temperature of last loop
         gradientFactor = self.gradientFactor    # gradient factor from settings
         hysteresis = self.hyteresis             # hysteresis to prevent to many on/off switches
-
+        self._logger = logging.getLogger(type(self).__name__)
         
         while self.is_running():
             
@@ -51,5 +51,7 @@ class GradientController(KettleController):
                     self._logger.debug('heater on')
                     self.heater_on(100)
 
+            self._logger.debug(' ')
+            self._logger.debug(' ')
             lastTemp = currentTemp
             self.sleep(sampleTime)
