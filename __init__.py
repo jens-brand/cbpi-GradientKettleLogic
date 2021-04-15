@@ -23,7 +23,6 @@ class GradientController(KettleController):
         lastTemp = 0                                   # kettle temperature of last loop
         gradientFactor = float(self.gradientFactor)    # gradient factor from settings
         hysteresis = float(self.hyteresis)             # hysteresis to prevent to many on/off switches
-        self._logger = logging.getLogger(type(self).__name__)
         
         while self.is_running():
             
@@ -33,25 +32,26 @@ class GradientController(KettleController):
             # get current kettle target temperature 
             targetTemp = float(self.get_target_temp())
             
-            self._logger.debug('currentTemp: {0}'.format(currentTemp))
-            self._logger.debug('targetTemp: {0}'.format(targetTemp))
-            self._logger.debug('lastTemp: {0}'.format(lastTemp))
+            app.logger.info('currentTemp: {0}'.format(currentTemp))
+            app.logger.info('targetTemp: {0}'.format(targetTemp))
+            app.logger.info('lastTemp: {0}'.format(lastTemp))
 
             # gradient can only be calculated, if temperatur of the last loop is known
             if (lastTemp > 0):
                 # calculate gradient
                 gradient = ((currentTemp - lastTemp) / sampleTime) * 60 # gradient in kelvin per minute
 
-                self._logger.debug('gradient: {0}'.format(gradient))
+                app.logger.info('gradient: {0}'.format(gradient))
                 
                 if (currentTemp >= targetTemp - (gradient * gradientFactor)):
-                    self._logger.debug('heater off')
+                    app.logger.info('heater off')
                     self.heater_off()
                 elif (currentTemp <= targetTemp - (gradient * gradientFactor) - hysteresis):
-                    self._logger.debug('heater on')
+                    app.logger.info('heater on')
                     self.heater_on(100)
 
-            self._logger.debug(' ')
-            self._logger.debug(' ')
+            app.logger.info(' ')
+            app.logger.info(' ')
+            
             lastTemp = currentTemp
             self.sleep(sampleTime)
