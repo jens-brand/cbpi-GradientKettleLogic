@@ -16,7 +16,7 @@ class GradientController(KettleController):
         sampleTime = 10                                # in seconds
         gradientFactor = float(self.gradientFactor)    # gradient factor from settings
         hysteresis = float(self.hyteresis)             # hysteresis to prevent to many on/off switches
-        gradientTime = 120                              # time over which the gradient is calculated in seconds
+        gradientTime = 120                             # time over which the gradient is calculated in seconds
 
 
         lastTempsSize = math.ceil(gradientTime / sampleTime)    # how many temperatures should be used to calulate gradient
@@ -54,6 +54,6 @@ class GradientController(KettleController):
 
             lastTemps.append(currentTemp)
             if len(lastTemps) > lastTempsSize:
-                lastTemps.remove(0)
+                lastTemps.pop(0)
 
             self.sleep(sampleTime)
