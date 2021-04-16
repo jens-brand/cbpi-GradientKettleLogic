@@ -1,5 +1,4 @@
-import logging
-#import time
+import math
 from modules import cbpi
 from modules.core.controller import KettleController
 from modules.core.props import Property
@@ -9,20 +8,19 @@ from modules.core.props import Property
 class GradientController(KettleController):
 
     # Custom Properties
-       
+
     gradientFactor = Property.Number("gradient factor", True, 1.0, description="Sets the gradient factor, default is 1.0")
     hyteresis = Property.Number("hysteresis", True, 1.0, description="hysteresis to prevent to many on/off switches")
 
     def run(self):
-        '''
-        Each controller is exectuted in its own thread. The run method is the entry point
-        :return: 
-        '''
-
         sampleTime = 10                                # in seconds
-        lastTemp = 0                                   # kettle temperature of last loop
         gradientFactor = float(self.gradientFactor)    # gradient factor from settings
         hysteresis = float(self.hyteresis)             # hysteresis to prevent to many on/off switches
+        gradientTime = 120                              # time over which the gradient is calculated in seconds
+
+
+        lastTempsSize = math.ceil(gradientTime / sampleTime)    # how many temperatures should be used to calulate gradient
+        lastTemps = []                                          # list with last measured temperatures
         
         while self.is_running():
             
@@ -32,28 +30,30 @@ class GradientController(KettleController):
             # get current kettle target temperature 
             targetTemp = float(self.get_target_temp())
             
-            cbpi.app.logger.info('currentTemp: {0}'.format(currentTemp))
-            cbpi.app.logger.info('targetTemp: {0}'.format(targetTemp))
-            cbpi.app.logger.info('lastTemp: {0}'.format(lastTemp))
             print 'currentTemp: {0}'.format(currentTemp)
             print 'targetTemp: {0}'.format(targetTemp)
-            print 'lastTemp: {0}'.format(lastTemp)
 
-            # gradient can only be calculated, if temperatur of the last loop is known
-            if (lastTemp > 0):
+            # gradient can only be calculated, if at minimum 1 last temperatur is known
+            if len(lastTemps) > 0:
+    
+                # calulate average of last measured temperatures
+                lastTemp = sum(lastTemps) / len(lastTemps)
+                print 'lastTemp: {0}'.format(lastTemp)
+
                 # calculate gradient
                 gradient = ((currentTemp - lastTemp) / sampleTime) * 60 # gradient in kelvin per minute
 
-                cbpi.app.logger.info('gradient: {0}'.format(gradient))
                 print 'gradient: {0}'.format(gradient)
                 
-                if (currentTemp >= targetTemp - (gradient * gradientFactor)):
+                if currentTemp >= targetTemp - (gradient * gradientFactor):
                     print 'heater off'
                     self.heater_off()
-                elif (currentTemp <= targetTemp - (gradient * gradientFactor) - hysteresis):
-                    cbpi.app.logger.info('heater on')
+                elif currentTemp <= targetTemp - (gradient * gradientFactor) - hysteresis:
                     print 'heater on'
                     self.heater_on(100)
 
-            lastTemp = currentTemp
+            lastTemps.append(currentTemp)
+            if len(lastTemps) > lastTempsSize:
+                lastTemps.remove(0)
+
             self.sleep(sampleTime)
