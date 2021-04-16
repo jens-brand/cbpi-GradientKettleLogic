@@ -16,11 +16,9 @@ class GradientController(KettleController):
         sampleTime = 10                                # in seconds
         gradientFactor = float(self.gradientFactor)    # gradient factor from settings
         hysteresis = float(self.hyteresis)             # hysteresis to prevent to many on/off switches
-        gradientTime = 60                              # time over which the gradient is calculated in seconds
 
-
-        lastTempsSize = math.ceil(gradientTime / sampleTime)    # how many temperatures should be used to calulate gradient
-        lastTemps = []                                          # list with last measured temperatures
+        lastTempsSize = math.ceil(60 / sampleTime)     # how many temperatures should be used to calulate gradient
+        lastTemps = []                                 # list with last measured temperatures
         
         while self.is_running():
             
@@ -35,14 +33,20 @@ class GradientController(KettleController):
 
             # gradient can only be calculated, if at minimum 1 last temperatur is known
             if len(lastTemps) > 0:
-    
-                # calulate average of last measured temperatures
-                lastTemp = sum(lastTemps) / len(lastTemps)
+                
+                for i in range(len(lastTemps)):
+                    print 'lastTemps[{0}] : {1}'.format(i, lastTemps(i))
+
+                if len(lastTemps) >= lastTempsSize:
+                    lastTemp = lastTemps.pop(0)
+                    # calculate gradient
+                    gradient = currentTemp - lastTemp # gradient in kelvin per minute
+                else:
+                    lastTemp = lastTemps[0]
+                    # calculate gradient
+                    gradient = ((currentTemp - lastTemp) / (sampleTime * len(lastTemps)) * 60 # gradient in kelvin per minute
+
                 print 'lastTemp: {0}'.format(lastTemp)
-
-                # calculate gradient
-                gradient = ((currentTemp - lastTemp) / sampleTime) * 60 # gradient in kelvin per minute
-
                 print 'gradient: {0}'.format(gradient)
                 
                 if currentTemp >= targetTemp - (gradient * gradientFactor):
@@ -53,7 +57,5 @@ class GradientController(KettleController):
                     self.heater_on(100)
 
             lastTemps.append(currentTemp)
-            if len(lastTemps) > lastTempsSize:
-                lastTemps.pop(0)
 
             self.sleep(sampleTime)
