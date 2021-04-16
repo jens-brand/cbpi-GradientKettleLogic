@@ -35,7 +35,7 @@ class GradientController(KettleController):
             if len(lastTemps) > 0:
                 
                 for i in range(len(lastTemps)):
-                    print 'lastTemps[{0}] : {1}'.format(i, lastTemps(i))
+                    print 'lastTemps[{0}] : {1}'.format(i, lastTemps[i])
 
                 if len(lastTemps) >= lastTempsSize:
                     lastTemp = lastTemps.pop(0)
@@ -44,10 +44,10 @@ class GradientController(KettleController):
                 else:
                     lastTemp = lastTemps[0]
                     # calculate gradient
-                    gradient = ((currentTemp - lastTemp) / (sampleTime * len(lastTemps)) * 60 # gradient in kelvin per minute
+                    gradient = ((currentTemp - lastTemp) / (sampleTime * len(lastTemps))) * 60 # gradient in kelvin per minute
 
-                print 'lastTemp: {0}'.format(lastTemp)
                 print 'gradient: {0}'.format(gradient)
+                print 'lastTemp: {0}'.format(lastTemp)
                 
                 if currentTemp >= targetTemp - (gradient * gradientFactor):
                     print 'heater off'
